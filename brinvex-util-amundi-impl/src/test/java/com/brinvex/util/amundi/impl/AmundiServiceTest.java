@@ -28,7 +28,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +38,7 @@ import java.util.stream.Stream;
 import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AmundiServiceTest {
 
@@ -52,6 +55,12 @@ class AmundiServiceTest {
                     List<Transaction> trans = amundiSvc.parseTransactionStatements(is);
                     assertNotNull(trans);
                     assertEquals(122, trans.size());
+                    Map<String, Transaction> tranIds = new LinkedHashMap<>();
+                    for (Transaction tran : trans) {
+                        String tranId = tran.getId();
+                        Transaction oldTran = tranIds.put(tranId, tran);
+                        assertNull(oldTran);
+                    }
                 }
             }
         }
@@ -65,6 +74,12 @@ class AmundiServiceTest {
                 try (InputStream is = new FileInputStream(testFilePath.toFile())) {
                     List<Transaction> trans = amundiSvc.parseTransactionStatements(is);
                     assertNotNull(trans);
+                    Map<String, Transaction> tranIds = new LinkedHashMap<>();
+                    for (Transaction tran : trans) {
+                        String tranId = tran.getId();
+                        Transaction oldTran = tranIds.put(tranId, tran);
+                        assertNull(oldTran);
+                    }
                 }
             }
         }
@@ -78,6 +93,12 @@ class AmundiServiceTest {
                 try (InputStream is = new FileInputStream(testFilePath.toFile())) {
                     List<Transaction> trans = amundiSvc.parseTransactionStatements(is);
                     assertNotNull(trans);
+                    Map<String, Transaction> tranIds = new LinkedHashMap<>();
+                    for (Transaction tran : trans) {
+                        String tranId = tran.getId();
+                        Transaction oldTran = tranIds.put(tranId, tran);
+                        assertNull(oldTran);
+                    }
                 }
             }
         }

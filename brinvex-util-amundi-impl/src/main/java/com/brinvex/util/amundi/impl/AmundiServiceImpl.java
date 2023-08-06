@@ -163,6 +163,7 @@ public class AmundiServiceImpl implements AmundiService {
                 throw e;
             }
 
+            BigDecimal tranGrossAmount = grossAmount2.negate();
             Transaction t = new Transaction();
             t.setAccountNumber(accNumber);
             t.setType(tranType);
@@ -173,13 +174,32 @@ public class AmundiServiceImpl implements AmundiService {
             t.setDescription("%s %s".formatted(desc1, desc2).trim());
             t.setCurrency(Currency.EUR);
             t.setFees(fees.negate());
-            t.setGrossAmount(grossAmount2.negate());
+            t.setGrossAmount(tranGrossAmount);
             t.setQuantity(qty);
             t.setPrice(unitPrice);
             t.setPriceDay(priceDay);
+            t.setId(generateTranId(isin, tranType, orderDay, settleDay, tranGrossAmount, qty));
             trans.add(t);
         }
         return trans;
+    }
+
+    private String generateTranId(
+            String isin,
+            TransactionType type,
+            LocalDate orderDay,
+            LocalDate settleDay,
+            BigDecimal grossAmount,
+            BigDecimal qty
+    ) {
+        return "%s/%s/%s/%s/%s/%s".formatted(
+                isin,
+                type,
+                orderDay,
+                settleDay,
+                grossAmount.setScale(2, RoundingMode.HALF_UP),
+                qty.setScale(2, RoundingMode.HALF_UP)
+        );
     }
 
     private void assertLine(int lineIdxZeroBased, String actual, String expected) {

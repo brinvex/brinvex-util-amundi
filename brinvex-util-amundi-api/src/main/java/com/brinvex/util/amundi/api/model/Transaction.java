@@ -22,6 +22,8 @@ import java.util.StringJoiner;
 
 public class Transaction implements Serializable {
 
+    private String id;
+
     private String accountNumber;
 
     private TransactionType type;
@@ -169,5 +171,13 @@ public class Transaction implements Serializable {
                 .add("description='" + description + "'")
                 .add("settleDay=" + settleDay)
                 .toString();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
