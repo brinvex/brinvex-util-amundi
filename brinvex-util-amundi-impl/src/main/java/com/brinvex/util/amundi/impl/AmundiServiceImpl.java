@@ -87,8 +87,8 @@ public class AmundiServiceImpl implements AmundiService {
             LocalTime tradeTime;
             LocalDate settleDay;
             BigDecimal fees;
-            BigDecimal grossAmount1;
-            BigDecimal grossAmount2;
+            BigDecimal netAmount1;
+            BigDecimal netAmount2;
             LocalDate tradeDay;
             BigDecimal qty;
             BigDecimal unitPrice;
@@ -115,11 +115,11 @@ public class AmundiServiceImpl implements AmundiService {
                     String[] parts = lines.get(++i).trim().split("EUR");
                     assertLine(i, parts[0].trim(), LazyHolder.MONEY_PATTERN);
                     fees = ParseUtil.parseDecimal(parts[0]);
-                    grossAmount1 = ParseUtil.parseDecimal(parts[1]);
-                    grossAmount2 = ParseUtil.parseDecimal(parts[2]);
-                    if (grossAmount1.compareTo(BigDecimal.ZERO) != 0
-                        && grossAmount1.setScale(0, RoundingMode.DOWN).compareTo(grossAmount2.setScale(0, RoundingMode.DOWN)) != 0) {
-                        throw new InvalidStatementException("Unexpected %s.line: %s %s".formatted(i + 1, grossAmount1, grossAmount2));
+                    netAmount1 = ParseUtil.parseDecimal(parts[1]);
+                    netAmount2 = ParseUtil.parseDecimal(parts[2]);
+                    if (netAmount1.compareTo(BigDecimal.ZERO) != 0
+                        && netAmount1.setScale(0, RoundingMode.DOWN).compareTo(netAmount2.setScale(0, RoundingMode.DOWN)) != 0) {
+                        throw new InvalidStatementException("Unexpected %s.line: %s %s".formatted(i + 1, netAmount1, netAmount2));
                     }
                     tradeDay = LocalDate.parse(parts[3].trim(), LazyHolder.DF);
                 }
@@ -163,7 +163,7 @@ public class AmundiServiceImpl implements AmundiService {
                 throw e;
             }
 
-            BigDecimal tranGrossAmount = grossAmount2.negate();
+            BigDecimal tranNetAmount = netAmount2.negate();
             Transaction t = new Transaction();
             t.setAccountNumber(accNumber);
             t.setType(tranType);
@@ -174,11 +174,11 @@ public class AmundiServiceImpl implements AmundiService {
             t.setDescription("%s %s".formatted(desc1, desc2).trim());
             t.setCurrency(Currency.EUR);
             t.setFees(fees.negate());
-            t.setGrossAmount(tranGrossAmount);
+            t.setNetAmount(tranNetAmount);
             t.setQuantity(qty);
             t.setPrice(unitPrice);
             t.setPriceDay(priceDay);
-            t.setId(generateTranId(isin, tranType, orderDay, settleDay, tranGrossAmount, qty));
+            t.setId(generateTranId(isin, tranType, orderDay, settleDay, tranNetAmount, qty));
             trans.add(t);
         }
         return trans;

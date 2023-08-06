@@ -30,7 +30,7 @@ public class Transaction implements Serializable {
 
     private LocalDate orderDay;
 
-    private BigDecimal grossAmount;
+    private BigDecimal netAmount;
 
     private BigDecimal fees;
 
@@ -98,12 +98,12 @@ public class Transaction implements Serializable {
         this.description = description;
     }
 
-    public BigDecimal getGrossAmount() {
-        return grossAmount;
+    public BigDecimal getNetAmount() {
+        return netAmount;
     }
 
-    public void setGrossAmount(BigDecimal grossAmount) {
-        this.grossAmount = grossAmount;
+    public void setNetAmount(BigDecimal netAmount) {
+        this.netAmount = netAmount;
     }
 
     public Currency getCurrency() {
@@ -160,7 +160,7 @@ public class Transaction implements Serializable {
                 .add("accountNumber='" + accountNumber + "'")
                 .add("type=" + type)
                 .add("orderDay=" + orderDay)
-                .add("grossAmount=" + grossAmount)
+                .add("grossAmount=" + netAmount)
                 .add("fees=" + fees)
                 .add("quantity=" + quantity)
                 .add("price=" + price)
