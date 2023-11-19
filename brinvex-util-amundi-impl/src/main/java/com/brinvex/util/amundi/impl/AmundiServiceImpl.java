@@ -168,6 +168,7 @@ public class AmundiServiceImpl implements AmundiService {
             t.setAccountNumber(accNumber);
             t.setType(tranType);
             t.setOrderDay(orderDay);
+            t.setTradeDay(tradeDay);
             t.setSettleDay(settleDay);
             t.setIsin(isin);
             t.setInstrumentName(instName);

@@ -40,9 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@SuppressWarnings("SpellCheckingInspection")
 class AmundiServiceTest {
 
-    private static final String TEST_DATA_FOLDER = "c:/prj/brinvex/brinvex-util/brinvex-util-amundi/test-data";
+    private static final String TEST_DATA_FOLDER = "c:/prj/bx-util/bx-util-amundi/test-data";
 
     private final AmundiService amundiSvc = AmundiServiceFactory.INSTANCE.getService();
 
@@ -102,10 +103,6 @@ class AmundiServiceTest {
                 }
             }
         }
-    }
-
-    private List<Path> getTestFilePaths() {
-        return getTestFilePaths(fileName -> true);
     }
 
     private List<Path> getTestFilePaths(Predicate<String> fileNameFilter) {

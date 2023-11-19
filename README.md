@@ -10,23 +10,23 @@ to easily extract and work with data from Amundi reports.
 - Add dependencies
 ````
 <repository>
-    <id>brinvex-mvnrepo</id>
-    <url>https://github.com/brinvex/brinvex-mvnrepo/raw/main/</url>
+    <id>repository.brinvex</id>
+    <name>Brinvex Repository</name>
+    <url>https://github.com/brinvex/brinvex-repo/raw/main/</url>
     <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
+        <enabled>false</enabled>
     </snapshots>
 </repository>
 
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-amundi-api</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-amundi-impl</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <scope>runtime</scope>
 </dependency>
 ````

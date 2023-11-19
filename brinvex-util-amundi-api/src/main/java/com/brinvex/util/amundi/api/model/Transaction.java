@@ -18,6 +18,7 @@ package com.brinvex.util.amundi.api.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.StringJoiner;
 
 public class Transaction implements Serializable {
@@ -29,6 +30,8 @@ public class Transaction implements Serializable {
     private TransactionType type;
 
     private LocalDate orderDay;
+
+    private LocalDate tradeDay;
 
     private BigDecimal netAmount;
 
@@ -50,6 +53,14 @@ public class Transaction implements Serializable {
 
     private LocalDate settleDay;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public TransactionType getType() {
         return type;
     }
@@ -64,6 +75,14 @@ public class Transaction implements Serializable {
 
     public void setOrderDay(LocalDate orderDay) {
         this.orderDay = orderDay;
+    }
+
+    public LocalDate getTradeDay() {
+        return tradeDay;
+    }
+
+    public void setTradeDay(LocalDate tradeDay) {
+        this.tradeDay = tradeDay;
     }
 
     public LocalDate getSettleDay() {
@@ -160,6 +179,7 @@ public class Transaction implements Serializable {
                 .add("accountNumber='" + accountNumber + "'")
                 .add("type=" + type)
                 .add("orderDay=" + orderDay)
+                .add("tradeDate=" + tradeDay)
                 .add("grossAmount=" + netAmount)
                 .add("fees=" + fees)
                 .add("quantity=" + quantity)
@@ -171,13 +191,5 @@ public class Transaction implements Serializable {
                 .add("description='" + description + "'")
                 .add("settleDay=" + settleDay)
                 .toString();
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }
