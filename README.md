@@ -9,7 +9,7 @@ to easily extract and work with data from Amundi reports.
  
 ````
 <properties>
-     <brinvex-util-amundi.version>1.3.0</brinvex-util-amundi.version>
+     <brinvex-util-amundi.version>1.4.0</brinvex-util-amundi.version>
 </properties>
 
 <repository>
