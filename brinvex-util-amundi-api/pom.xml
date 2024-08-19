@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.brinvex.util</groupId>
         <artifactId>brinvex-util-amundi</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.0</version>
     </parent>
 
     <artifactId>brinvex-util-amundi-api</artifactId>
@@ -35,5 +35,13 @@
         Brinvex-Util-Amundi is a compact Java library which enables developers
         to easily extract and work with data from Amundi reports.
     </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.brinvex.util</groupId>
+            <artifactId>brinvex-util-dms-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
 </project>

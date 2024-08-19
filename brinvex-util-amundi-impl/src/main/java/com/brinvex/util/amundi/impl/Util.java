@@ -16,8 +16,9 @@
 package com.brinvex.util.amundi.impl;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 
-class ParseUtil {
+class Util {
 
     static BigDecimal parseDecimal(String s) {
         if (s == null || s.isBlank()) {
@@ -29,7 +30,7 @@ class ParseUtil {
     }
 
     static String deleteAllWhitespaces(String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
         final int sz = str.length();
@@ -47,6 +48,16 @@ class ParseUtil {
             return "";
         }
         return new String(chs, 0, count);
+    }
+
+    public static <E> E getFirstThrowIfMore(Collection<E> collection) {
+        int size = collection.size();
+        return switch (size) {
+            case 0 -> null;
+            case 1 -> collection.iterator().next();
+            default -> throw new IllegalStateException(
+                    "Expecting empty or one-element collection but got #%s, %s".formatted(size, collection));
+        };
     }
 
 

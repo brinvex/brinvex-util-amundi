@@ -15,28 +15,24 @@
  */
 package com.brinvex.util.amundi.api.service;
 
-import java.util.ServiceLoader;
+import com.brinvex.util.amundi.api.model.statement.Trade;
 
-/**
- * A factory for {@link AmundiService} based on Java SPI.
- */
-public enum AmundiServiceFactory {
+import java.io.InputStream;
+import java.util.List;
 
-    INSTANCE;
+public interface AmndParser {
 
-    private AmundiService service;
+    List<Trade> parseTransactionStatement(InputStream statementContent);
 
-    public AmundiService getService() {
-        if (service == null) {
-            ServiceLoader<AmundiService> loader = ServiceLoader.load(AmundiService.class);
-            for (AmundiService provider : loader) {
-                this.service = provider;
-                break;
-            }
+    List<Trade> parseTransactionStatement(byte[] statementContent);
+
+    static AmndParser create() {
+        try {
+            return (AmndParser) Class.forName("com.brinvex.util.amundi.impl.AmndParserImpl")
+                    .getConstructor()
+                    .newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        if (service == null) {
-            throw new IllegalStateException(String.format("Not found any implementation of interface '%s'", AmundiService.class));
-        }
-        return service;
     }
 }

@@ -17,6 +17,10 @@ package com.brinvex.util.amundi.api.model;
 
 public enum TransactionType {
 
+    DEPOSIT,
+
+    WITHDRAWAL,
+
     BUY,
 
     SELL,

@@ -15,10 +15,9 @@
  */
 package com.brinvex.util.amundi.api.service.exception;
 
-public class InvalidStatementException extends AmundiServiceException {
+public class AmndException extends RuntimeException {
 
-    public InvalidStatementException(String message) {
+    public AmndException(String message) {
         super(message);
     }
-
 }

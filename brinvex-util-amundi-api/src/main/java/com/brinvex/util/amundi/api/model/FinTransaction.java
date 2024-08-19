@@ -13,12 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.brinvex.util.amundi.api.service.exception;
+package com.brinvex.util.amundi.api.model;
 
-public class InvalidDataException extends AmundiServiceException {
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
-    public InvalidDataException(String message) {
-        super(message);
-    }
-
+public record FinTransaction(
+        String id,
+        LocalDate date,
+        TransactionType type,
+        String isin,
+        BigDecimal qty,
+        Currency ccy,
+        BigDecimal price,
+        BigDecimal grossValue,
+        BigDecimal netValue,
+        BigDecimal fee,
+        LocalDate settleDay
+) {
 }

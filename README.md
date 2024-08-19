@@ -1,14 +1,17 @@
-# Brinvex-Util-Amundi
+## Brinvex-Util-Amundi
 
-## Introduction
+### Introduction
 
 _Brinvex-Util-Amundi_ is a compact Java library which enables developers 
 to easily extract and work with data from Amundi reports.
 
-## How to use it
+### Maven dependency
  
-- Add dependencies
 ````
+<properties>
+     <brinvex-util-amundi.version>1.3.0</brinvex-util-amundi.version>
+</properties>
+
 <repository>
     <id>repository.brinvex</id>
     <name>Brinvex Repository</name>
@@ -21,23 +24,25 @@ to easily extract and work with data from Amundi reports.
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-amundi-api</artifactId>
-    <version>1.2.0</version>
+    <version>${brinvex-util-amundi.version}</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-amundi-impl</artifactId>
-    <version>1.2.0</version>
+    <version>${brinvex-util-amundi.version}</version>
     <scope>runtime</scope>
 </dependency>
 ````
-- Process statements files 
+### Example
 ````
-AmundiService amundiSvc = AmundiServiceFactory.INSTANCE.getService();
-amundiSvc.parseTransactionStatements(...); 
+AmndParser parser = AmundiService.create();
+parser.parseTransactionStatements(...); 
 ````
+### Recommendations
+If using within Spring ecosystem, consider to exclude ```commons-logging```.
 
 ### Requirements
-- Java 17 or above
+- Java 21 or above
 
 ### License
 

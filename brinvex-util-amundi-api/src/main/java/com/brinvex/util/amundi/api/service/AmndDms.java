@@ -15,13 +15,18 @@
  */
 package com.brinvex.util.amundi.api.service;
 
-import com.brinvex.util.amundi.api.model.Transaction;
+public interface AmndDms {
 
-import java.io.InputStream;
-import java.util.List;
+    byte[] getStatementContent(String accountId);
 
-public interface AmundiService {
-
-    List<Transaction> parseTransactionStatements(InputStream statementInputStream);
+    static AmndDms create(com.brinvex.util.dms.api.Dms dms) {
+        try {
+            return (AmndDms) Class.forName("com.brinvex.util.amundi.impl.AmndDmsImpl")
+                    .getConstructor(com.brinvex.util.dms.api.Dms.class)
+                    .newInstance(dms);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

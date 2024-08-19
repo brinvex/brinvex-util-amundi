@@ -16,11 +16,13 @@
 package com.brinvex.util.amundi.impl;
 
 import com.brinvex.util.amundi.api.model.Currency;
-import com.brinvex.util.amundi.api.model.Transaction;
-import com.brinvex.util.amundi.api.model.TransactionType;
-import com.brinvex.util.amundi.api.service.AmundiService;
-import com.brinvex.util.amundi.api.service.exception.InvalidStatementException;
+import com.brinvex.util.amundi.api.model.statement.Trade;
+import com.brinvex.util.amundi.api.model.statement.TradeType;
+import com.brinvex.util.amundi.api.service.AmndParser;
+import com.brinvex.util.amundi.api.service.exception.AmndException;
+import com.brinvex.util.amundi.impl.builder.TradeBuilder;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,8 +36,8 @@ import java.util.regex.Pattern;
 
 import static java.util.function.Predicate.not;
 
-@SuppressWarnings("SpellCheckingInspection")
-public class AmundiServiceImpl implements AmundiService {
+@SuppressWarnings({"SpellCheckingInspection", "unused"})
+public class AmndParserImpl implements AmndParser {
 
     private final PdfReader pdfReader = new PdfReader();
 
@@ -49,8 +51,8 @@ public class AmundiServiceImpl implements AmundiService {
 
     @SuppressWarnings({"CaughtExceptionImmediatelyRethrown", "unused", "UnusedAssignment"})
     @Override
-    public List<Transaction> parseTransactionStatements(InputStream statementInputStream) {
-        List<String> lines = pdfReader.readPdfLines(statementInputStream);
+    public List<Trade> parseTransactionStatement(InputStream statementContent) {
+        List<String> lines = pdfReader.readPdfLines(statementContent);
 
         String accNumber = lines.get(1).trim();
         assertLine(2, accNumber, LazyHolder.ACCOUNT_NUMBER_PATTERN);
@@ -79,20 +81,20 @@ public class AmundiServiceImpl implements AmundiService {
 
         lines = lines.stream().filter(s -> s.length() < 120).toList();
 
-        List<Transaction> trans = new ArrayList<>();
+        List<Trade> trades = new ArrayList<>();
         for (int i = tranIdx + 1; i < lines.size(); i++) {
 
-            TransactionType tranType;
-            LocalDate orderDay;
+            TradeType tradeType;
+            LocalDate orderDate;
             LocalTime tradeTime;
-            LocalDate settleDay;
+            LocalDate settleDate;
             BigDecimal fees;
             BigDecimal netAmount1;
             BigDecimal netAmount2;
-            LocalDate tradeDay;
+            LocalDate tradeDate;
             BigDecimal qty;
             BigDecimal unitPrice;
-            LocalDate priceDay;
+            LocalDate priceDate;
             String instName;
             String isin;
             String desc1;
@@ -104,9 +106,9 @@ public class AmundiServiceImpl implements AmundiService {
                 if (desc1.startsWith("Investícia")) {
                     line = lines.get(++i);
                     assertLine(i, line, "Bezhotovostný prevod");
-                    tranType = TransactionType.BUY;
+                    tradeType = TradeType.BUY;
                 } else if (desc1.startsWith("Spätné odkúpenie")) {
-                    tranType = TransactionType.SELL;
+                    tradeType = TradeType.SELL;
                 } else {
                     break;
                 }
@@ -114,27 +116,28 @@ public class AmundiServiceImpl implements AmundiService {
                 {
                     String[] parts = lines.get(++i).trim().split("EUR");
                     assertLine(i, parts[0].trim(), LazyHolder.MONEY_PATTERN);
-                    fees = ParseUtil.parseDecimal(parts[0]);
-                    netAmount1 = ParseUtil.parseDecimal(parts[1]);
-                    netAmount2 = ParseUtil.parseDecimal(parts[2]);
+                    fees = Util.parseDecimal(parts[0]);
+                    netAmount1 = Util.parseDecimal(parts[1]);
+                    netAmount2 = Util.parseDecimal(parts[2]);
                     if (netAmount1.compareTo(BigDecimal.ZERO) != 0
                         && netAmount1.setScale(0, RoundingMode.DOWN).compareTo(netAmount2.setScale(0, RoundingMode.DOWN)) != 0) {
-                        throw new InvalidStatementException("Unexpected %s.line: %s %s".formatted(i + 1, netAmount1, netAmount2));
+                        String message = "Unexpected %s.line: %s %s".formatted(i + 1, netAmount1, netAmount2);
+                        throw new AmndException(message);
                     }
-                    tradeDay = LocalDate.parse(parts[3].trim(), LazyHolder.DF);
+                    tradeDate = LocalDate.parse(parts[3].trim(), LazyHolder.DF);
                 }
 
                 line = lines.get(++i);
                 tradeTime = LocalTime.parse(line);
 
                 line = lines.get(++i);
-                settleDay = LocalDate.parse(line, LazyHolder.DF);
+                settleDate = LocalDate.parse(line, LazyHolder.DF);
 
                 line = lines.get(++i);
                 assertLine(i, line, "00:00:00");
 
                 line = lines.get(++i);
-                orderDay = LocalDate.parse(line, LazyHolder.DF);
+                orderDate = LocalDate.parse(line, LazyHolder.DF);
 
                 line = lines.get(++i);
 
@@ -142,18 +145,18 @@ public class AmundiServiceImpl implements AmundiService {
                     line = lines.get(++i);
                     int n1 = line.indexOf(' ');
                     String part0 = line.substring(0, n1);
-                    unitPrice = ParseUtil.parseDecimal(part0);
+                    unitPrice = Util.parseDecimal(part0);
 
                     String part1 = line.substring(n1 + 1, n1 + 4);
                     assertLine(i, part1, "EUR");
 
                     int n2 = line.lastIndexOf(' ');
-                    qty = ParseUtil.parseDecimal(line.substring(n2));
+                    qty = Util.parseDecimal(line.substring(n2));
 
                     String innerStr = line.substring(n1 + 4, n2);
                     int n3 = innerStr.lastIndexOf(' ');
                     instName = innerStr.substring(0, n3);
-                    priceDay = LocalDate.parse(innerStr.substring(n3 + 1, n3 + 11), LazyHolder.DF);
+                    priceDate = LocalDate.parse(innerStr.substring(n3 + 1, n3 + 11), LazyHolder.DF);
                 }
 
                 isin = lines.get(++i);
@@ -164,30 +167,35 @@ public class AmundiServiceImpl implements AmundiService {
             }
 
             BigDecimal tranNetAmount = netAmount2.negate();
-            Transaction t = new Transaction();
-            t.setAccountNumber(accNumber);
-            t.setType(tranType);
-            t.setOrderDay(orderDay);
-            t.setTradeDay(tradeDay);
-            t.setSettleDay(settleDay);
-            t.setIsin(isin);
-            t.setInstrumentName(instName);
-            t.setDescription("%s %s".formatted(desc1, desc2).trim());
-            t.setCurrency(Currency.EUR);
-            t.setFees(fees.negate());
-            t.setNetAmount(tranNetAmount);
-            t.setQuantity(qty);
-            t.setPrice(unitPrice);
-            t.setPriceDay(priceDay);
-            t.setId(generateTranId(isin, tranType, orderDay, settleDay, tranNetAmount, qty));
-            trans.add(t);
+            trades.add(new TradeBuilder()
+                    .accountId(accNumber)
+                    .type(tradeType)
+                    .orderDate(orderDate)
+                    .tradeDate(tradeDate)
+                    .settleDate(settleDate)
+                    .isin(isin)
+                    .instrumentName(instName)
+                    .description("%s %s".formatted(desc1, desc2).trim())
+                    .currency(Currency.EUR)
+                    .fees(fees.negate())
+                    .netAmount(tranNetAmount)
+                    .quantity(qty)
+                    .price(unitPrice)
+                    .priceDate(priceDate)
+                    .id(getTradeId(isin, tradeType, orderDate, settleDate, tranNetAmount, qty))
+                    .build());
         }
-        return trans;
+        return trades;
     }
 
-    private String generateTranId(
+    @Override
+    public List<Trade> parseTransactionStatement(byte[] statementContent) {
+        return parseTransactionStatement(new ByteArrayInputStream(statementContent));
+    }
+
+    private String getTradeId(
             String isin,
-            TransactionType type,
+            TradeType type,
             LocalDate orderDay,
             LocalDate settleDay,
             BigDecimal grossAmount,
@@ -205,13 +213,15 @@ public class AmundiServiceImpl implements AmundiService {
 
     private void assertLine(int lineIdxZeroBased, String actual, String expected) {
         if (!Objects.equals(actual, expected)) {
-            throw new InvalidStatementException("Unexpected %s.line: '%s'".formatted(lineIdxZeroBased + 1, actual));
+            String message = "Unexpected %s.line: '%s'".formatted(lineIdxZeroBased + 1, actual);
+            throw new AmndException(message);
         }
     }
 
     private void assertLine(int lineIdxZeroBased, String actual, Pattern expectedPattern) {
         if (actual == null || !expectedPattern.matcher(actual).matches()) {
-            throw new InvalidStatementException("Unexpected %s.line: '%s'".formatted(lineIdxZeroBased + 1, actual));
+            String message = "Unexpected %s.line: '%s'".formatted(lineIdxZeroBased + 1, actual);
+            throw new AmndException(message);
         }
     }
 }

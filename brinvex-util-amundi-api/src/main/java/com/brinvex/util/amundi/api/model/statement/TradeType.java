@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.brinvex.util.amundi.api.service.exception;
+package com.brinvex.util.amundi.api.model.statement;
 
-public class AmundiServiceException extends RuntimeException {
+public enum TradeType {
 
-    public AmundiServiceException(String message) {
-        super(message);
-    }
+    BUY,
+
+    SELL,
+
 }
