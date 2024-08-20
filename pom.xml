@@ -21,7 +21,7 @@
 
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-amundi</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
     <packaging>pom</packaging>
 
     <name>Brinvex-Util-Amundi</name>
