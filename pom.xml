@@ -21,7 +21,7 @@
 
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-amundi</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <packaging>pom</packaging>
 
     <name>Brinvex-Util-Amundi</name>
@@ -79,7 +79,7 @@
 
         <brinvex-util-dms.version>1.0.7</brinvex-util-dms.version>
 
-        <pdfbox.version>2.0.29</pdfbox.version>
+        <pdfbox.version>3.0.3</pdfbox.version>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.5.6</logback.version>
         <lombok.version>1.18.34</lombok.version>
