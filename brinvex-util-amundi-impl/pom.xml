@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.brinvex.util</groupId>
         <artifactId>brinvex-util-amundi</artifactId>
-        <version>1.4.0</version>
+        <version>1.4.1</version>
     </parent>
 
     <artifactId>brinvex-util-amundi-impl</artifactId>
