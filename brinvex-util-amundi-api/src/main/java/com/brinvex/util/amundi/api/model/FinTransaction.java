@@ -20,11 +20,11 @@ import java.time.LocalDate;
 
 public record FinTransaction(
         String id,
+        FinTransactionType type,
         LocalDate date,
-        TransactionType type,
         String isin,
         BigDecimal qty,
-        Currency ccy,
+        String ccy,
         BigDecimal price,
         BigDecimal grossValue,
         BigDecimal netValue,

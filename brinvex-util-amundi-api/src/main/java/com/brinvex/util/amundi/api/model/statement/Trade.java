@@ -15,24 +15,21 @@
  */
 package com.brinvex.util.amundi.api.model.statement;
 
-import com.brinvex.util.amundi.api.model.Currency;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record Trade(
-        String id,
-        String accountId,
         TradeType type,
+        String accountId,
         LocalDate orderDate,
         LocalDate tradeDate,
-        BigDecimal netAmount,
+        BigDecimal netValue,
         BigDecimal fee,
-        BigDecimal quantity,
+        BigDecimal qty,
         BigDecimal price,
         LocalDate priceDate,
-        Currency currency,
+        String ccy,
         String isin,
         String instrumentName,
         String description,

@@ -15,7 +15,6 @@
  */
 package com.brinvex.util.amundi.impl.builder;
 
-import com.brinvex.util.amundi.api.model.Currency;
 import com.brinvex.util.amundi.api.model.statement.Trade;
 import com.brinvex.util.amundi.api.model.statement.TradeType;
 import lombok.Setter;
@@ -27,17 +26,16 @@ import java.time.LocalDate;
 @Setter
 @Accessors(fluent = true, chain = true)
 public class TradeBuilder {
-    private String id;
-    private String accountId;
     private TradeType type;
+    private String accountId;
     private LocalDate orderDate;
     private LocalDate tradeDate;
-    private BigDecimal netAmount;
+    private BigDecimal netValue;
     private BigDecimal fees;
     private BigDecimal quantity;
     private BigDecimal price;
     private LocalDate priceDate;
-    private Currency currency;
+    private String ccy;
     private String isin;
     private String instrumentName;
     private String description;
@@ -45,17 +43,16 @@ public class TradeBuilder {
 
     public Trade build() {
         return new Trade(
-                id,
-                accountId,
                 type,
+                accountId,
                 orderDate,
                 tradeDate,
-                netAmount,
+                netValue,
                 fees,
                 quantity,
                 price,
                 priceDate,
-                currency,
+                ccy,
                 isin,
                 instrumentName,
                 description,

@@ -15,9 +15,8 @@
  */
 package com.brinvex.util.amundi.impl.builder;
 
-import com.brinvex.util.amundi.api.model.Currency;
 import com.brinvex.util.amundi.api.model.FinTransaction;
-import com.brinvex.util.amundi.api.model.TransactionType;
+import com.brinvex.util.amundi.api.model.FinTransactionType;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -28,11 +27,11 @@ import java.time.LocalDate;
 @Accessors(fluent = true, chain = true)
 public class FinTransactionBuilder {
     private String id;
+    private FinTransactionType type;
     private LocalDate date;
-    private TransactionType type;
     private String isin;
     private BigDecimal qty;
-    private Currency ccy;
+    private String ccy;
     private BigDecimal price;
     private BigDecimal grossValue;
     private BigDecimal netValue;
@@ -42,8 +41,8 @@ public class FinTransactionBuilder {
     public FinTransaction build() {
         return new FinTransaction(
                 id,
-                date,
                 type,
+                date,
                 isin,
                 qty,
                 ccy,

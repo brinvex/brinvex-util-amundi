@@ -15,14 +15,12 @@
  */
 package com.brinvex.util.amundi.impl;
 
-import com.brinvex.util.amundi.api.model.Currency;
 import com.brinvex.util.amundi.api.model.statement.Trade;
 import com.brinvex.util.amundi.api.model.statement.TradeType;
 import com.brinvex.util.amundi.api.service.AmndParser;
 import com.brinvex.util.amundi.api.service.exception.AmndException;
 import com.brinvex.util.amundi.impl.builder.TradeBuilder;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -41,7 +39,7 @@ public class AmndParserImpl implements AmndParser {
 
     private final PdfReader pdfReader = new PdfReader();
 
-    private static class LazyHolder {
+    private static class Lazy {
         static final Pattern ACCOUNT_NUMBER_PATTERN = Pattern.compile("\\d{8,}");
         static final Pattern MONEY_PATTERN = Pattern.compile("-?(\\d+\\s)*\\d+,\\d{2}");
         static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -55,7 +53,7 @@ public class AmndParserImpl implements AmndParser {
         List<String> lines = pdfReader.readPdfLines(statementContent);
 
         String accNumber = lines.get(1).trim();
-        assertLine(2, accNumber, LazyHolder.ACCOUNT_NUMBER_PATTERN);
+        assertLine(2, accNumber, Lazy.ACCOUNT_NUMBER_PATTERN);
 
         int tranIdx = (int) (
                 lines.stream()
@@ -115,7 +113,7 @@ public class AmndParserImpl implements AmndParser {
 
                 {
                     String[] parts = lines.get(++i).trim().split("EUR");
-                    assertLine(i, parts[0].trim(), LazyHolder.MONEY_PATTERN);
+                    assertLine(i, parts[0].trim(), Lazy.MONEY_PATTERN);
                     fees = Util.parseDecimal(parts[0]);
                     netAmount1 = Util.parseDecimal(parts[1]);
                     netAmount2 = Util.parseDecimal(parts[2]);
@@ -124,20 +122,20 @@ public class AmndParserImpl implements AmndParser {
                         String message = "Unexpected %s.line: %s %s".formatted(i + 1, netAmount1, netAmount2);
                         throw new AmndException(message);
                     }
-                    tradeDate = LocalDate.parse(parts[3].trim(), LazyHolder.DF);
+                    tradeDate = LocalDate.parse(parts[3].trim(), Lazy.DF);
                 }
 
                 line = lines.get(++i);
                 tradeTime = LocalTime.parse(line);
 
                 line = lines.get(++i);
-                settleDate = LocalDate.parse(line, LazyHolder.DF);
+                settleDate = LocalDate.parse(line, Lazy.DF);
 
                 line = lines.get(++i);
                 assertLine(i, line, "00:00:00");
 
                 line = lines.get(++i);
-                orderDate = LocalDate.parse(line, LazyHolder.DF);
+                orderDate = LocalDate.parse(line, Lazy.DF);
 
                 line = lines.get(++i);
 
@@ -156,11 +154,11 @@ public class AmndParserImpl implements AmndParser {
                     String innerStr = line.substring(n1 + 4, n2);
                     int n3 = innerStr.lastIndexOf(' ');
                     instName = innerStr.substring(0, n3);
-                    priceDate = LocalDate.parse(innerStr.substring(n3 + 1, n3 + 11), LazyHolder.DF);
+                    priceDate = LocalDate.parse(innerStr.substring(n3 + 1, n3 + 11), Lazy.DF);
                 }
 
                 isin = lines.get(++i);
-                assertLine(i, isin, LazyHolder.ISIN_PATTERN);
+                assertLine(i, isin, Lazy.ISIN_PATTERN);
 
             } catch (Exception e) {
                 throw e;
@@ -176,39 +174,15 @@ public class AmndParserImpl implements AmndParser {
                     .isin(isin)
                     .instrumentName(instName)
                     .description("%s %s".formatted(desc1, desc2).trim())
-                    .currency(Currency.EUR)
+                    .ccy("EUR")
                     .fees(fees.negate())
-                    .netAmount(tranNetAmount)
+                    .netValue(tranNetAmount)
                     .quantity(qty)
                     .price(unitPrice)
                     .priceDate(priceDate)
-                    .id(getTradeId(isin, tradeType, orderDate, settleDate, tranNetAmount, qty))
                     .build());
         }
         return trades;
-    }
-
-    @Override
-    public List<Trade> parseTransactionStatement(byte[] statementContent) {
-        return parseTransactionStatement(new ByteArrayInputStream(statementContent));
-    }
-
-    private String getTradeId(
-            String isin,
-            TradeType type,
-            LocalDate orderDay,
-            LocalDate settleDay,
-            BigDecimal grossAmount,
-            BigDecimal qty
-    ) {
-        return "%s/%s/%s/%s/%s/%s".formatted(
-                isin,
-                type,
-                orderDay,
-                settleDay,
-                grossAmount.setScale(2, RoundingMode.HALF_UP),
-                qty.setScale(2, RoundingMode.HALF_UP)
-        );
     }
 
     private void assertLine(int lineIdxZeroBased, String actual, String expected) {

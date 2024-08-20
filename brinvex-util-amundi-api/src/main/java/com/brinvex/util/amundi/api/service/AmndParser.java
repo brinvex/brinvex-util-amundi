@@ -17,6 +17,7 @@ package com.brinvex.util.amundi.api.service;
 
 import com.brinvex.util.amundi.api.model.statement.Trade;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
@@ -24,7 +25,9 @@ public interface AmndParser {
 
     List<Trade> parseTransactionStatement(InputStream statementContent);
 
-    List<Trade> parseTransactionStatement(byte[] statementContent);
+    default List<Trade> parseTransactionStatement(byte[] statementContent) {
+        return parseTransactionStatement(new ByteArrayInputStream(statementContent));
+    }
 
     static AmndParser create() {
         try {

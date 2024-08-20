@@ -15,8 +15,14 @@
  */
 package com.brinvex.util.amundi.api.model;
 
-public enum Currency {
+public enum FinTransactionType {
 
-    EUR
+    DEPOSIT,
+
+    WITHDRAWAL,
+
+    BUY,
+
+    SELL,
 
 }

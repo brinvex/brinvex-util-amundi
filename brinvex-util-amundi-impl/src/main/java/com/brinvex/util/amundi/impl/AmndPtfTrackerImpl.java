@@ -15,9 +15,8 @@
  */
 package com.brinvex.util.amundi.impl;
 
-import com.brinvex.util.amundi.api.model.Currency;
 import com.brinvex.util.amundi.api.model.FinTransaction;
-import com.brinvex.util.amundi.api.model.TransactionType;
+import com.brinvex.util.amundi.api.model.FinTransactionType;
 import com.brinvex.util.amundi.api.model.statement.Trade;
 import com.brinvex.util.amundi.api.service.AmndDms;
 import com.brinvex.util.amundi.api.service.AmndParser;
@@ -27,7 +26,9 @@ import com.brinvex.util.amundi.impl.builder.FinTransactionBuilder;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,6 +39,11 @@ import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("unused")
 public class AmndPtfTrackerImpl implements AmndPtfTracker {
+
+    private static class Lazy {
+        private static final DateTimeFormatter ID_DF8 = DateTimeFormatter.ofPattern("yyyyMMdd");
+        private static final DateTimeFormatter ID_DF6 = DateTimeFormatter.ofPattern("yyMMdd");
+    }
 
     private final AmndDms amndDms;
 
@@ -75,69 +81,70 @@ public class AmndPtfTrackerImpl implements AmndPtfTracker {
     }
 
     private List<FinTransaction> mapTradeToFinTransactionPair(Trade trade) {
-        String id = trade.id();
-        LocalDate orderDay = trade.orderDate();
-        String isin = trade.isin();
-        BigDecimal qty = trade.quantity();
-        BigDecimal price = trade.price();
+
+        BigDecimal qty = trade.qty();
         BigDecimal fees = trade.fee();
-        BigDecimal tax = BigDecimal.ZERO;
-        Currency ccy = trade.currency();
-        BigDecimal netValue = trade.netAmount();
+        BigDecimal netValue = trade.netValue();
         BigDecimal grossValue = netValue.subtract(fees);
-        LocalDate settleDate = trade.settleDate();
+
+        String id = "%s/%s/%s/%s/%s".formatted(
+                Lazy.ID_DF8.format(trade.orderDate()),
+                Lazy.ID_DF6.format(trade.tradeDate()),
+                Lazy.ID_DF6.format(trade.settleDate()),
+                netValue.setScale(2, RoundingMode.HALF_UP),
+                qty.setScale(2, RoundingMode.HALF_UP));
 
         return switch (trade.type()) {
             case BUY -> List.of(
                     new FinTransactionBuilder()
-                            .type(TransactionType.DEPOSIT)
-                            .id("DEPOSIT/" + id)
-                            .date(orderDay)
+                            .type(FinTransactionType.DEPOSIT)
+                            .id(id + "/1/DEPOSIT")
+                            .date(trade.orderDate())
                             .qty(BigDecimal.ZERO)
-                            .ccy(ccy)
+                            .ccy(trade.ccy())
                             .grossValue(netValue.negate())
                             .netValue(netValue.negate())
                             .fee(BigDecimal.ZERO)
-                            .settleDay(settleDate)
+                            .settleDay(trade.settleDate())
                             .build(),
                     new FinTransactionBuilder()
-                            .type(TransactionType.BUY)
-                            .id(id)
-                            .date(orderDay)
-                            .isin(isin)
+                            .type(FinTransactionType.BUY)
+                            .id(id + "/2/BUY")
+                            .date(trade.orderDate())
+                            .isin(trade.isin())
                             .qty(qty)
-                            .price(price)
-                            .ccy(ccy)
+                            .price(trade.price())
+                            .ccy(trade.ccy())
                             .grossValue(grossValue)
                             .netValue(netValue)
                             .fee(fees)
-                            .settleDay(settleDate)
+                            .settleDay(trade.settleDate())
                             .build()
             );
             case SELL -> List.of(
                     new FinTransactionBuilder()
-                            .type(TransactionType.SELL)
-                            .id(id)
-                            .date(orderDay)
-                            .isin(isin)
+                            .type(FinTransactionType.SELL)
+                            .id(id + "/3/SELL")
+                            .date(trade.orderDate())
+                            .isin(trade.isin())
                             .qty(qty)
-                            .price(price)
-                            .ccy(ccy)
+                            .price(trade.price())
+                            .ccy(trade.ccy())
                             .grossValue(grossValue)
                             .netValue(netValue)
                             .fee(fees)
-                            .settleDay(settleDate)
+                            .settleDay(trade.settleDate())
                             .build(),
                     new FinTransactionBuilder()
-                            .type(TransactionType.WITHDRAWAL)
-                            .id("WITHDRAWAL/" + id)
-                            .date(orderDay)
+                            .type(FinTransactionType.WITHDRAWAL)
+                            .id(id + "/4/WITHDRAWAL")
+                            .date(trade.orderDate())
                             .qty(BigDecimal.ZERO)
-                            .ccy(ccy)
+                            .ccy(trade.ccy())
                             .grossValue(netValue.negate())
                             .netValue(netValue.negate())
                             .fee(BigDecimal.ZERO)
-                            .settleDay(settleDate)
+                            .settleDay(trade.settleDate())
                             .build()
             );
         };

@@ -15,9 +15,8 @@
  */
 package com.brinvex.util.amundi.impl;
 
-import com.brinvex.util.amundi.api.model.Currency;
 import com.brinvex.util.amundi.api.model.FinTransaction;
-import com.brinvex.util.amundi.api.model.TransactionType;
+import com.brinvex.util.amundi.api.model.FinTransactionType;
 import com.brinvex.util.amundi.api.model.statement.Trade;
 import com.brinvex.util.amundi.api.service.AmndDms;
 import com.brinvex.util.amundi.api.service.AmndParser;
@@ -32,9 +31,9 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.LocalDate.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -97,12 +96,7 @@ class AmndTest {
                 .toList();
         assertNotNull(trades);
         assertEquals(122, trades.size());
-        Map<String, Trade> tranIds = new LinkedHashMap<>();
-        for (Trade trade : trades) {
-            String tranId = trade.id();
-            Trade oldTran = tranIds.put(tranId, trade);
-            assertNull(oldTran);
-        }
+        assertEquals(new ArrayList<>(new LinkedHashSet<>(trades)), trades);
     }
 
     @EnabledIf("testAccount2IsNotNull")
@@ -114,12 +108,7 @@ class AmndTest {
                 .toList();
         assertNotNull(trades);
         assertEquals(106, trades.size());
-        Map<String, Trade> tranIds = new LinkedHashMap<>();
-        for (Trade trade : trades) {
-            String tranId = trade.id();
-            Trade oldTran = tranIds.put(tranId, trade);
-            assertNull(oldTran);
-        }
+        assertEquals(new ArrayList<>(new LinkedHashSet<>(trades)), trades);
     }
 
     @EnabledIf("testAccount3IsNotNull")
@@ -131,12 +120,7 @@ class AmndTest {
                 .toList();
         assertNotNull(trades);
         assertEquals(119, trades.size());
-        Map<String, Trade> tranIds = new LinkedHashMap<>();
-        for (Trade trade : trades) {
-            String tranId = trade.id();
-            Trade oldTran = tranIds.put(tranId, trade);
-            assertNull(oldTran);
-        }
+        assertEquals(new ArrayList<>(new LinkedHashSet<>(trades)), trades);
     }
 
     @EnabledIf("testAccount1IsNotNull")
@@ -153,10 +137,10 @@ class AmndTest {
 
             {
                 FinTransaction tran = finTransactions.getFirst();
-                assertEquals(TransactionType.DEPOSIT, tran.type());
+                assertEquals(FinTransactionType.DEPOSIT, tran.type());
                 assertNull(tran.isin());
                 assertEquals(new BigDecimal("0"), tran.qty());
-                assertEquals(Currency.EUR, tran.ccy());
+                assertEquals("EUR", tran.ccy());
                 assertNull(tran.price());
                 assertEquals(new BigDecimal("400.00"), tran.grossValue());
                 assertEquals(new BigDecimal("400.00"), tran.netValue());
@@ -165,10 +149,10 @@ class AmndTest {
             }
             {
                 FinTransaction tran = finTransactions.get(1);
-                assertEquals(TransactionType.BUY, tran.type());
+                assertEquals(FinTransactionType.BUY, tran.type());
                 assertEquals("LU1121647660", tran.isin());
                 assertEquals(new BigDecimal("16.435"), tran.qty());
-                assertEquals(Currency.EUR, tran.ccy());
+                assertEquals("EUR", tran.ccy());
                 assertEquals(new BigDecimal("7.910000"), tran.price());
                 assertEquals(new BigDecimal("-130.00"), tran.grossValue());
                 assertEquals(new BigDecimal("-400.00"), tran.netValue());
@@ -178,10 +162,10 @@ class AmndTest {
 
             {
                 FinTransaction tran = finTransactions.getLast();
-                assertEquals(TransactionType.WITHDRAWAL, tran.type());
+                assertEquals(FinTransactionType.WITHDRAWAL, tran.type());
                 assertNull(tran.isin());
                 assertEquals(new BigDecimal("0"), tran.qty());
-                assertEquals(Currency.EUR, tran.ccy());
+                assertEquals("EUR", tran.ccy());
                 assertNull(tran.price());
                 assertEquals(new BigDecimal("-406.50"), tran.grossValue());
                 assertEquals(new BigDecimal("-406.50"), tran.netValue());
@@ -190,10 +174,10 @@ class AmndTest {
             }
             {
                 FinTransaction tran = finTransactions.get(finTransactions.size() - 2);
-                assertEquals(TransactionType.SELL, tran.type());
+                assertEquals(FinTransactionType.SELL, tran.type());
                 assertEquals("LU1121647660", tran.isin());
                 assertEquals(new BigDecimal("-50.000"), tran.qty());
-                assertEquals(Currency.EUR, tran.ccy());
+                assertEquals("EUR", tran.ccy());
                 assertEquals(new BigDecimal("8.130000"), tran.price());
                 assertEquals(new BigDecimal("406.50"), tran.grossValue());
                 assertEquals(new BigDecimal("406.50"), tran.netValue());
